@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Channels - MithiaTube</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<div class="container" style="display:block;max-width:700px">
+  <div class="section-header"><span>Channels</span></div>
+  <div class="video-list" id="list"><div class="loading">Loading...</div></div>
+</div>
+<div id="footer"></div>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+document.getElementById('header').innerHTML=renderHeader('channels');
+document.getElementById('footer').innerHTML=renderFooter();
+bindLogout();
+(async()=>{
+  try{
+    const profiles=await api(TABLE_PROFILES+'?select=*&order=created_at.desc&limit=50');
+    document.getElementById('list').innerHTML=profiles.length?profiles.map(p=>`
+      <div class="video-row">
+        <a href="channel.html?u=${encodeURIComponent(p.username)}"><img class="avatar" src="${esc(p.avatar_url||'https://via.placeholder.com/48')}" alt="" style="width:64px;height:64px"></a>
+        <div class="info">
+          <a href="channel.html?u=${encodeURIComponent(p.username)}" class="title">${esc(p.display_name||p.username)}</a>
+          <div class="meta">@${esc(p.username)}<br>${esc(p.bio||'')}</div>
+        </div>
+      </div>`).join(''):'<div class="loading">No channels yet.</div>';
+  }catch(err){document.getElementById('list').innerHTML='<div class="error">'+esc(err.message)+'</div>';}
+})();
+</script>
+</body>
+</html>

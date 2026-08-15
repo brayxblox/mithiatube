@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Watch - MithiaTube</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<div class="watch-layout">
+  <div class="player-col">
+    <div class="watch-title" id="title">Loading...</div>
+    <div class="player-wrap" id="player"></div>
+    <div class="rate-bar" id="ratebar"></div>
+    <div class="comments-box">
+      <h3>Comments &amp; Responses</h3>
+      <div id="comment-form-wrap"></div>
+      <div id="comments"><div class="loading">Loading comments...</div></div>
+    </div>
+  </div>
+  <div class="watch-side">
+    <div class="about-box">
+      <h3>About This Video</h3>
+      <div class="content" id="about">Loading...</div>
+    </div>
+    <div class="about-box">
+      <h3>Explore More Videos</h3>
+      <div id="related"><div class="loading">Loading...</div></div>
+    </div>
+  </div>
+</div>
+<div id="footer"></div>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+document.getElementById('header').innerHTML=renderHeader('videos');
+document.getElementById('footer').innerHTML=renderFooter();
+bindLogout();
+const id=new URLSearchParams(location.search).get('v');
+if(!id){document.querySelector('.player-col').innerHTML='<div class="error">Invalid video ID</div>';}
+else (async()=>{
+  try{
+    const v=await getVideo(id);
+    if(!v)throw new Error('Video not found');
+    bumpViews(id);
+    document.title=v.title+' - MithiaTube';
+    document.getElementById('title').textContent=v.title;
+    const p=document.getElementById('player');
+    if((v.video_url||'').includes('youtube')||(v.video_url||'').includes('youtu.be')){
+      p.innerHTML=`<iframe src="${esc(v.video_url)}?rel=0&modestbranding=1" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe>`;
+    }else{
+      p.innerHTML=`<video controls poster="${esc(v.thumbnail||'')}"><source src="${esc(v.video_url)}" type="video/mp4"></video>`;
+    }
+    document.getElementById('ratebar').innerHTML=`
+      <div><strong>Rate this video</strong><br><span class="stars">${stars(v.rating)}</span><br>Please <a href="login.html">login</a> to rate.</div>
+      <div><a href="#">Save to Favorites</a><br><a href="#">Share Video</a><br><a href="#">Flag as Inappropriate</a></div>
+      <div>Views: ${fmtViews(v.views)}<br>Comments: <span id="ccount">0</span><br>Favorited: 0 times</div>
+      ${isAdmin()?`<div><button id="admin-del-vid" style="padding:3px 8px;cursor:pointer;color:#c00;border:1px solid #c00;background:#fee;font-size:11px">Delete Video (ADM)</button></div>`:''}`;
+    const tags=(v.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
+    document.getElementById('about').innerHTML=`
+      Added: ${timeAgo(v.created_at)}<br>
+      From: <a href="channel.html?u=${encodeURIComponent(v.channel||'')}">${esc(v.channel)}</a>
+      <span style="float:right"><button style="font-size:10px;padding:2px 8px;background:#f90;border:1px solid #c70;cursor:pointer">SUBSCRIBE</button></span><br><br>
+      ${esc(v.description||'').replace(/\n/g,'<br>')}<br><br>
+      Tags: ${tags.map(t=>`<a href="videos.html?q=${encodeURIComponent(t)}">${esc(t)}</a>`).join(' ')}<br><br>
+      URL: <input readonly value="${location.href}" style="width:95%;font-size:10px;padding:2px">`;
+    const all=await getVideos({limit:8});
+    document.getElementById('related').innerHTML=all.filter(x=>x.id!=id).slice(0,5).map(r=>`
+      <div class="related-item">
+        <a href="watch.html?v=${r.id}"><img src="${esc(r.thumbnail||'https://via.placeholder.com/80x55')}" alt=""></a>
+        <div><a href="watch.html?v=${r.id}" class="r-title">${esc(r.title)}</a>${esc(r.duration||'')}<br>From: ${esc(r.channel)}<br>Views: ${fmtViews(r.views)}</div>
+      </div>`).join('')||'<div class="loading">None</div>';
+    const user=getSession();
+    const formWrap=document.getElementById('comment-form-wrap');
+    if(user){
+      formWrap.innerHTML=`<textarea id="cbody" placeholder="Would you like to Comment?"></textarea><br><button id="csubmit">Post a text comment</button><div id="cmsg"></div>`;
+      document.getElementById('csubmit').onclick=async()=>{
+        const body=document.getElementById('cbody').value.trim();
+        const msg=document.getElementById('cmsg');
+        if(!body){msg.innerHTML='<div class="error">Empty comment</div>';return;}
+        if(!canComment()){msg.innerHTML='<div class="error">Slow down! Wait 15 seconds between comments.</div>';return;}
+        try{
+          await postComment(parseInt(id,10),user.username,body);
+          markCommented();
+          document.getElementById('cbody').value='';
+          msg.innerHTML='<div class="success">Comment posted!</div>';
+          loadComments();
+        }catch(e){msg.innerHTML='<div class="error">'+esc(e.message)+'</div>';}
+      };
+    }else{
+      formWrap.innerHTML=`<p style="font-size:11px">Join <a href="signup.html">MithiaTube</a> for a free account, or <a href="login.html">Login</a> if you are already a member.</p>`;
+    }
+    async function loadComments(){
+      const cs=await getComments(id);
+      document.getElementById('ccount').textContent=cs.length;
+      document.getElementById('comments').innerHTML=cs.length?cs.map(c=>`
+        <div class="comment-item">
+          <span class="c-user"><a href="channel.html?u=${encodeURIComponent(c.username)}">${esc(c.username)}</a></span>
+          <span class="c-time">${timeAgo(c.created_at)}</span><br>
+          ${esc(c.body)}
+        </div>`).join(''):'<p style="color:#666;font-size:11px">No comments yet.</p>';
+    }
+    loadComments();
+    const delBtn=document.getElementById('admin-del-vid');
+    if(delBtn)delBtn.onclick=async()=>{
+      if(!confirm('Delete this video as admin?'))return;
+      try{await deleteVideo(id);location.href='index.html';}catch(e){alert(e.message);}
+    };
+  }catch(err){
+    document.querySelector('.player-col').innerHTML='<div class="error">'+esc(err.message)+'</div>';
+  }
+})();
+</script>
+</body>
+</html>

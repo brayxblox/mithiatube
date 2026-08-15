@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign Up - MithiaTube</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<div class="container">
+  <div class="main">
+    <div class="form-box" style="margin:20px 0;max-width:480px">
+      <h2>Join MithiaTube</h2>
+      <p style="font-size:11px;margin-bottom:10px">Joining is free and easy.</p>
+      <div id="msg"></div>
+      <form id="signupform">
+        <label>User Name: *</label>
+        <input type="text" id="username" required>
+        <label>Password: *</label>
+        <input type="password" id="password" required>
+        <label>Confirm Password: *</label>
+        <input type="password" id="password2" required>
+        <label>Display Name:</label>
+        <input type="text" id="display">
+        <label><input type="checkbox" checked required> I agree to the terms of use.</label>
+        <br><br>
+        <button type="submit">Sign Up</button>
+      </form>
+    </div>
+  </div>
+  <div class="sidebar">
+    <div class="side-box">
+      <h3>Log In</h3>
+      <div class="content">Already a Member? <a href="login.html">Login here</a>.</div>
+    </div>
+  </div>
+</div>
+<div id="footer"></div>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+document.getElementById('header').innerHTML=renderHeader('');
+document.getElementById('footer').innerHTML=renderFooter();
+document.getElementById('signupform').onsubmit=async e=>{
+  e.preventDefault();
+  const msg=document.getElementById('msg');
+  const username=document.getElementById('username').value.trim();
+  const pass=document.getElementById('password').value;
+  const pass2=document.getElementById('password2').value;
+  const display=document.getElementById('display').value.trim()||username;
+  if(pass!==pass2){msg.innerHTML='<div class="error">Passwords do not match</div>';return;}
+  if(pass.length<6){msg.innerHTML='<div class="error">Password min 6 characters</div>';return;}
+  try{
+    const session=await registerUser(username,pass,display);
+    setSession(session);
+    msg.innerHTML='<div class="success">Account created!</div>';
+    setTimeout(()=>location.href='index.html',700);
+  }catch(err){msg.innerHTML='<div class="error">'+esc(err.message)+'</div>';}
+};
+</script>
+</body>
+</html>

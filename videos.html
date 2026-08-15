@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Videos - MithiaTube</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<div class="container" style="display:block;max-width:900px">
+  <div class="section-header"><span id="v-title">Videos</span></div>
+  <div class="video-list" id="list"><div class="loading">Loading...</div></div>
+</div>
+<div id="footer"></div>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+document.getElementById('header').innerHTML=renderHeader('videos');
+document.getElementById('footer').innerHTML=renderFooter();
+bindLogout();
+const params=new URLSearchParams(location.search);
+const q=params.get('q')||'';
+const mine=params.get('mine');
+(async()=>{
+  try{
+    let vs;
+    if(q){vs=await searchVideos(q);document.getElementById('v-title').textContent='Results for: '+q;}
+    else if(mine){
+      const u=getSession();
+      if(!u){location.href='login.html';return;}
+      vs=await searchVideos(u.username);
+      document.getElementById('v-title').textContent='My Videos';
+    }else{vs=await getVideos({limit:30});}
+    document.getElementById('list').innerHTML=vs.length?vs.map(videoRow).join(''):'<div class="loading">No videos found.</div>';
+  }catch(err){document.getElementById('list').innerHTML='<div class="error">'+esc(err.message)+'</div>';}
+})();
+</script>
+</body>
+</html>

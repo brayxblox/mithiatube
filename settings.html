@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Settings - MithiaTube</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<div class="form-box">
+  <h2>Account Settings</h2>
+  <div id="msg"></div>
+  <div id="form-area"><div class="loading">Loading...</div></div>
+  <div id="admin-area" style="margin-top:20px"></div>
+</div>
+<div id="footer"></div>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+document.getElementById('header').innerHTML=renderHeader('');
+document.getElementById('footer').innerHTML=renderFooter();
+bindLogout();
+const user=getSession();
+if(!user){location.href='login.html';}
+(async()=>{
+  const p=await getProfile(user.username);
+  if(!p){document.getElementById('form-area').innerHTML='<div class="error">Profile not found</div>';return;}
+  document.getElementById('form-area').innerHTML=`
+    <div class="profile-header">
+      <img class="avatar" id="avprev" src="${esc(p.avatar_url||'https://via.placeholder.com/48')}" alt="">
+      <div><strong>${esc(p.username)}</strong>${p.is_admin?' <span style="background:#c00;color:#fff;font-size:10px;padding:1px 4px">ADM</span>':''}<br>${esc(p.display_name||'')}</div>
+    </div>
+    <form id="setform">
+      <label>Display Name</label>
+      <input type="text" id="dname" value="${esc(p.display_name||'')}">
+      <label>Profile Picture URL</label>
+      <input type="url" id="avatar" value="${esc(p.avatar_url||'')}">
+      <label>Bio</label>
+      <textarea id="bio" rows="3">${esc(p.bio||'')}</textarea>
+      <label>New Password (leave blank to keep)</label>
+      <input type="password" id="npass" autocomplete="new-password">
+      <button type="submit">Save Changes</button>
+      <button type="button" id="delch" style="margin-left:8px;background:#fee;border-color:#c00;color:#c00">Delete My Channel</button>
+    </form>`;
+  document.getElementById('avatar').oninput=function(){document.getElementById('avprev').src=this.value||'https://via.placeholder.com/48';};
+  document.getElementById('setform').onsubmit=async e=>{
+    e.preventDefault();
+    const msg=document.getElementById('msg');
+    try{
+      const data={
+        display_name:document.getElementById('dname').value.trim(),
+        avatar_url:document.getElementById('avatar').value.trim(),
+        bio:document.getElementById('bio').value.trim()
+      };
+      const np=document.getElementById('npass').value;
+      if(np)data.password_hash=await hashPass(np);
+      await updateProfile(user.username,data);
+      setSession({...user,display_name:data.display_name,avatar_url:data.avatar_url,is_admin:user.is_admin});
+      msg.innerHTML='<div class="success">Saved!</div>';
+    }catch(err){msg.innerHTML='<div class="error">'+esc(err.message)+'</div>';}
+  };
+  document.getElementById('delch').onclick=async()=>{
+    if(!confirm('Delete your channel? This cannot be undone.'))return;
+    try{
+      await deleteProfile(user.username);
+      clearSession();
+      location.href='index.html';
+    }catch(err){document.getElementById('msg').innerHTML='<div class="error">'+esc(err.message)+'</div>';}
+  };
+  if(user.is_admin){
+    const profiles=await api(TABLE_PROFILES+'?select=username,display_name,is_admin&order=username.asc');
+    const videos=await getVideos({limit:50});
+    document.getElementById('admin-area').innerHTML=`
+      <h2 style="font-size:14px;border-top:1px solid #ccc;padding-top:12px">Admin Panel</h2>
+      <p style="font-size:11px;color:#666">You can delete any user or video.</p>
+      <h3 style="font-size:12px;margin:10px 0 6px">Users</h3>
+      <div id="admin-users">${profiles.map(pr=>`
+        <div style="padding:4px 0;border-bottom:1px solid #eee;font-size:11px;display:flex;justify-content:space-between;align-items:center">
+          <span><a href="channel.html?u=${encodeURIComponent(pr.username)}">${esc(pr.username)}</a> ${pr.is_admin?'(ADM)':''}</span>
+          ${pr.username==='Tomodacho'?'':`<button data-deluser="${esc(pr.username)}" style="font-size:10px;padding:2px 6px;cursor:pointer;color:#c00">Delete</button>`}
+        </div>`).join('')}</div>
+      <h3 style="font-size:12px;margin:14px 0 6px">Videos</h3>
+      <div id="admin-videos">${videos.map(v=>`
+        <div style="padding:4px 0;border-bottom:1px solid #eee;font-size:11px;display:flex;justify-content:space-between;align-items:center">
+          <span><a href="watch.html?v=${v.id}">${esc(v.title)}</a> by ${esc(v.channel)}</span>
+          <button data-delvid="${v.id}" style="font-size:10px;padding:2px 6px;cursor:pointer;color:#c00">Delete</button>
+        </div>`).join('')}</div>`;
+    document.getElementById('admin-area').addEventListener('click',async e=>{
+      const bu=e.target.getAttribute('data-deluser');
+      const bv=e.target.getAttribute('data-delvid');
+      if(bu){
+        if(!confirm('Delete user '+bu+'?'))return;
+        try{await deleteProfile(bu);e.target.parentElement.remove();}catch(err){alert(err.message);}
+      }
+      if(bv){
+        if(!confirm('Delete video #'+bv+'?'))return;
+        try{await deleteVideo(bv);e.target.parentElement.remove();}catch(err){alert(err.message);}
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>

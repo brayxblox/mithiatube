@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Log In - MithiaTube</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<div class="container">
+  <div class="main">
+    <div class="form-box" style="margin:20px 0">
+      <h2>Log In</h2>
+      <p style="font-size:11px;margin-bottom:10px">Already a Member? Login here.</p>
+      <div id="msg"></div>
+      <form id="loginform">
+        <label>User Name:</label>
+        <input type="text" id="username" required autocomplete="username">
+        <label>Password:</label>
+        <input type="password" id="password" required autocomplete="current-password">
+        <button type="submit">Log In</button>
+        <div style="margin-top:8px;font-size:11px">Forgot: <a href="#">Username</a> | <a href="#">Password</a></div>
+      </form>
+    </div>
+  </div>
+  <div class="sidebar">
+    <div class="side-box">
+      <h3>What Is MithiaTube?</h3>
+      <div class="content">
+        MithiaTube is a way to get your videos to the people who matter to you.<br><br>
+        <ul style="margin-left:16px">
+          <li>Upload, tag and share your videos worldwide</li>
+          <li>Browse thousands of original videos</li>
+          <li>Find, join and create video groups</li>
+          <li>Customize your experience with playlists</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="footer"></div>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+document.getElementById('header').innerHTML=renderHeader('');
+document.getElementById('footer').innerHTML=renderFooter();
+document.getElementById('loginform').onsubmit=async e=>{
+  e.preventDefault();
+  const msg=document.getElementById('msg');
+  const name=document.getElementById('username').value.trim();
+  const pass=document.getElementById('password').value;
+  try{
+    const session=await loginUser(name,pass);
+    setSession(session);
+    location.href='index.html';
+  }catch(err){msg.innerHTML='<div class="error">'+esc(err.message)+'</div>';}
+};
+</script>
+</body>
+</html>

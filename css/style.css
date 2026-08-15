@@ -1,0 +1,82 @@
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;font-size:12px;background:#fff;color:#000;line-height:1.4}
+a{color:#0033cc;text-decoration:none}
+a:hover{text-decoration:underline}
+.header-wrap{max-width:960px;margin:0 auto;padding:10px 12px 0}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo-block{display:flex;align-items:center;gap:10px}
+.logo-block img{height:48px;display:block}
+.logo-tagline{font-size:11px;color:#555}
+.header-right{text-align:right;font-size:11px}
+.header-right a{margin-left:6px}
+.header-search{display:flex;align-items:center;gap:4px;flex:1;justify-content:center;max-width:420px}
+.header-search input{flex:1;padding:4px 6px;border:1px solid #999;font-size:12px;min-width:160px}
+.header-search button{padding:4px 12px;font-size:12px;cursor:pointer;background:#f0f0f0;border:1px solid #999}
+.header-links-extra{font-size:11px;margin-top:4px}
+.header-links-extra a{margin-left:4px}
+.nav-bar{background:#c8ddf0;border:1px solid #a0b8d0;border-left:none;border-right:none;padding:5px 12px;margin-top:8px;font-size:12px}
+.nav-bar a{margin-right:10px;color:#0033cc;font-weight:bold}
+.nav-bar .new{background:#ff0;color:#000;font-size:9px;padding:0 3px;font-weight:bold}
+.container{max-width:960px;margin:12px auto;padding:0 12px;display:flex;gap:14px}
+.main{flex:1;min-width:0}
+.sidebar{width:220px;flex-shrink:0}
+.info-row{display:flex;border:1px solid #b0c8e0;background:#e8f0fa;margin-bottom:12px}
+.info-cell{flex:1;padding:10px 12px;border-right:1px dotted #a0b8d0;font-size:11px}
+.info-cell:last-child{border-right:none}
+.info-cell h3{font-size:13px;color:#0033cc;margin-bottom:4px}
+.info-cell .new{background:#ff0;font-size:9px;padding:0 3px;font-weight:bold}
+.section-head{display:flex;justify-content:space-between;align-items:center;background:#c0c0c0;padding:5px 10px;font-size:12px;font-weight:bold;border:1px solid #999;border-bottom:none}
+.section-head a{font-weight:normal;font-size:11px}
+.video-list{border:1px solid #999}
+.video-row{display:flex;gap:10px;padding:10px;border-bottom:1px dotted #aaa;background:#e8e8e8}
+.video-row:nth-child(even){background:#f0f0f0}
+.video-row img{width:120px;height:90px;object-fit:cover;border:1px solid #666;flex-shrink:0;background:#ddd}
+.video-row .info{flex:1;min-width:0}
+.video-row .title{font-size:13px;font-weight:bold;color:#0033cc;display:block;margin-bottom:2px}
+.video-row .meta{font-size:11px;color:#333;line-height:1.5}
+.video-row .stars{color:#c00;letter-spacing:1px}
+.side-box{border:1px solid #ccc;margin-bottom:12px;background:#fff}
+.side-box h3{background:#e8e8e8;padding:5px 8px;font-size:12px;border-bottom:1px solid #ccc}
+.side-box .content{padding:8px 10px;font-size:11px}
+.signup-promo{background:#fff8c0;border:1px solid #e0d080;padding:12px;text-align:center;margin-bottom:12px}
+.signup-promo a{font-size:14px;font-weight:bold;color:#0033cc}
+.contest-box{background:#ffe8c0;border:1px solid #e0c080;padding:12px;text-align:center;margin-bottom:12px}
+.contest-box h3{font-size:13px;margin-bottom:8px;color:#333}
+.login-box input[type=text],.login-box input[type=password]{width:100%;padding:3px;margin-bottom:6px;border:1px solid #999;font-size:12px}
+.login-box button{padding:3px 12px;font-size:12px;cursor:pointer}
+.watch-layout{max-width:960px;margin:12px auto;padding:0 12px;display:flex;gap:14px}
+.player-col{flex:1}
+.player-wrap{background:#000;position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border:1px solid #999}
+.player-wrap iframe,.player-wrap video{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.watch-title{font-size:16px;font-weight:bold;margin:8px 0}
+.rate-bar{display:flex;gap:16px;flex-wrap:wrap;padding:8px 0;border-top:1px solid #ddd;border-bottom:1px solid #ddd;font-size:11px;margin-bottom:10px}
+.rate-bar .stars{color:#c00;font-size:14px;letter-spacing:1px}
+.watch-side{width:280px;flex-shrink:0}
+.about-box{border:1px solid #ccc;margin-bottom:12px}
+.about-box h3{background:#e8e8e8;padding:5px 8px;font-size:12px;border-bottom:1px solid #ccc}
+.about-box .content{padding:8px 10px;font-size:11px;line-height:1.6}
+.related-item{display:flex;gap:8px;padding:6px 8px;border-bottom:1px solid #eee;font-size:11px}
+.related-item:hover{background:#ffffcc}
+.related-item img{width:80px;height:55px;object-fit:cover;border:1px solid #999;flex-shrink:0}
+.related-item .r-title{font-weight:bold;color:#0033cc;display:block}
+.form-box{max-width:420px;margin:20px auto;border:1px solid #ccc;background:#f7f7f7;padding:16px}
+.form-box h2{font-size:15px;margin-bottom:12px}
+.form-box label{display:block;font-weight:bold;margin-bottom:3px;font-size:12px}
+.form-box input[type=text],.form-box input[type=password],.form-box input[type=url],.form-box input[type=email],.form-box textarea,.form-box select{width:100%;padding:5px;border:1px solid #999;font-size:12px;margin-bottom:10px}
+.form-box button{padding:5px 16px;font-size:12px;cursor:pointer;background:#e8e8e8;border:1px solid #999}
+.comments-box{margin-top:14px}
+.comments-box h3{font-size:13px;margin-bottom:8px}
+.comments-box textarea{width:100%;height:60px;border:1px solid #999;padding:4px;font-size:12px;margin-bottom:6px}
+.comment-item{padding:8px 0;border-bottom:1px solid #eee;font-size:11px}
+.comment-item .c-user{font-weight:bold;color:#0033cc}
+.comment-item .c-time{color:#888;font-size:10px}
+.avatar{width:48px;height:48px;border-radius:4px;object-fit:cover;border:1px solid #999}
+.profile-header{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.error{background:#ffe0e0;border:1px solid #c00;color:#c00;padding:8px;margin:8px 0;font-size:12px}
+.success{background:#e0ffe0;border:1px solid #090;color:#090;padding:8px;margin:8px 0;font-size:12px}
+.loading{padding:20px;text-align:center;color:#666}
+.user-bar{font-size:11px}
+.user-bar img{width:18px;height:18px;vertical-align:middle;border-radius:2px;margin-right:3px}
+.footer{max-width:960px;margin:30px auto 15px;padding:10px 12px;border-top:1px solid #ccc;text-align:center;font-size:11px;color:#555}
+.footer a{margin:0 4px}
+@media(max-width:750px){.container,.watch-layout{flex-direction:column}.sidebar,.watch-side{width:100%}.info-row{flex-direction:column}.header-search{max-width:100%;width:100%}}

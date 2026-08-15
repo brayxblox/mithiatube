@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Upload - MithiaTube</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<div class="form-box" style="max-width:520px">
+  <h2>Upload Your Video</h2>
+  <p style="font-size:11px;margin-bottom:10px">Supported: MP4, 3GP, AVI, WebM, MOV, or YouTube URL</p>
+  <div id="msg"></div>
+  <form id="upform">
+    <label>Title *</label>
+    <input type="text" id="title" required>
+    <label>Description</label>
+    <textarea id="desc" rows="3"></textarea>
+    <label>Video file (mp4, 3gp, avi, webm, mov)</label>
+    <input type="file" id="vfile" accept="video/mp4,video/3gpp,video/x-msvideo,video/webm,video/quicktime,.mp4,.3gp,.avi,.webm,.mov">
+    <label>OR Video URL (YouTube / direct link)</label>
+    <input type="url" id="vurl" placeholder="https://...">
+    <label>Thumbnail image (optional)</label>
+    <input type="file" id="tfile" accept="image/*">
+    <label>OR Thumbnail URL</label>
+    <input type="url" id="thumb" placeholder="https://...">
+    <label>Duration (e.g. 3:45)</label>
+    <input type="text" id="dur" value="0:00">
+    <label>Tags (comma separated)</label>
+    <input type="text" id="tags" placeholder="funny, music">
+    <button type="submit" id="btn">Upload Video</button>
+  </form>
+</div>
+<div id="footer"></div>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+document.getElementById('header').innerHTML=renderHeader('upload');
+document.getElementById('footer').innerHTML=renderFooter();
+bindLogout();
+const user=getSession();
+if(!user)location.href='login.html';
+
+async function fileToDataUrl(file){
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
+}
+
+document.getElementById('upform').onsubmit=async e=>{
+  e.preventDefault();
+  const msg=document.getElementById('msg');
+  const btn=document.getElementById('btn');
+  const file=document.getElementById('vfile').files[0];
+  let vurl=document.getElementById('vurl').value.trim();
+  let thumb=document.getElementById('thumb').value.trim();
+  const tfile=document.getElementById('tfile').files[0];
+
+  if(!file&&!vurl){msg.innerHTML='<div class="error">Select a video file or paste a URL</div>';return;}
+
+  btn.disabled=true;btn.textContent='Uploading...';
+  try{
+    if(file){
+      if(file.size>15*1024*1024){throw new Error('File too large (max 15MB for browser upload). Use a URL for bigger files.');}
+      vurl=await fileToDataUrl(file);
+    }else{
+      const m=vurl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if(m){vurl='https://www.youtube.com/embed/'+m[1];if(!thumb)thumb='https://i.ytimg.com/vi/'+m[1]+'/hqdefault.jpg';}
+    }
+    if(tfile){
+      if(tfile.size>2*1024*1024)throw new Error('Thumbnail max 2MB');
+      thumb=await fileToDataUrl(tfile);
+    }
+    const res=await createVideo({
+      title:document.getElementById('title').value.trim(),
+      description:document.getElementById('desc').value.trim(),
+      channel:user.username,
+      thumbnail:thumb||'',
+      video_url:vurl,
+      views:0,comments:0,
+      duration:document.getElementById('dur').value.trim()||'0:00',
+      tags:document.getElementById('tags').value.trim(),
+      rating:0
+    });
+    const newId=res&&res[0]?res[0].id:null;
+    msg.innerHTML='<div class="success">Uploaded!</div>';
+    if(newId)setTimeout(()=>location.href='watch.html?v='+newId,600);
+  }catch(err){msg.innerHTML='<div class="error">'+esc(err.message)+'</div>';}
+  finally{btn.disabled=false;btn.textContent='Upload Video';}
+};
+</script>
+</body>
+</html>

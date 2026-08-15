@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Channel - MithiaTube</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<div class="container" style="display:block;max-width:900px">
+  <div id="profile-area"><div class="loading">Loading channel...</div></div>
+  <div class="section-header" style="margin-top:14px"><span>Channel Videos</span></div>
+  <div class="video-list" id="list"><div class="loading">Loading...</div></div>
+</div>
+<div id="footer"></div>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+document.getElementById('header').innerHTML=renderHeader('channels');
+document.getElementById('footer').innerHTML=renderFooter();
+bindLogout();
+const uname=new URLSearchParams(location.search).get('u')||'';
+if(!uname){document.getElementById('profile-area').innerHTML='<div class="error">No channel specified</div>';}
+else (async()=>{
+  try{
+    const p=await getProfile(uname);
+    if(!p){document.getElementById('profile-area').innerHTML='<div class="error">Channel not found</div>';return;}
+    document.title=p.display_name||p.username+' - MithiaTube';
+    document.getElementById('profile-area').innerHTML=`
+      <div class="profile-header">
+        <img class="avatar" src="${esc(p.avatar_url||'https://via.placeholder.com/48')}" alt="">
+        <div>
+          <strong style="font-size:16px">${esc(p.display_name||p.username)}</strong><br>
+          @${esc(p.username)}<br>
+          <span style="color:#666">${esc(p.bio||'')}</span>
+        </div>
+      </div>`;
+    const vs=await searchVideos(uname,30);
+    const mine=vs.filter(v=>(v.channel||'').toLowerCase()===uname.toLowerCase());
+    document.getElementById('list').innerHTML=mine.length?mine.map(videoRow).join(''):'<div class="loading">No videos on this channel.</div>';
+  }catch(err){document.getElementById('profile-area').innerHTML='<div class="error">'+esc(err.message)+'</div>';}
+})();
+</script>
+</body>
+</html>

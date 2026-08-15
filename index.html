@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MithiaTube</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="header"></div>
+<div class="container">
+  <div class="main">
+    <div class="info-row">
+      <div class="info-cell"><h3>Watch</h3>Instantly find and watch 1000's of fast streaming videos.</div>
+      <div class="info-cell"><h3>Upload</h3>Quickly upload and tag videos in almost any video format.</div>
+      <div class="info-cell"><h3>Share <span class="new">NEW</span></h3>Easily share your videos with family, friends, or co-workers.</div>
+    </div>
+    <div class="section-head"><span>Most Viewed Videos</span><a href="videos.html">See More Videos</a></div>
+    <div class="video-list" id="featured"><div class="loading">Loading...</div></div>
+  </div>
+  <div class="sidebar">
+    <div class="signup-promo" id="side-promo"></div>
+    <div class="contest-box">
+      <h3>Video Contest!</h3>
+      <p style="font-size:11px;margin-top:6px">Upload your best videos and share with the world.</p>
+    </div>
+    <div class="side-box">
+      <h3>Member Login</h3>
+      <div class="content login-box" id="sidebar-login"></div>
+    </div>
+  </div>
+</div>
+<div id="footer"></div>
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+document.getElementById('header').innerHTML=renderHeader('home');
+document.getElementById('footer').innerHTML=renderFooter();
+bindLogout();
+(function(){
+  const u=getSession();
+  const promo=document.getElementById('side-promo');
+  const box=document.getElementById('sidebar-login');
+  if(u){
+    promo.innerHTML=`Welcome, <strong>${esc(u.username)}</strong>${u.is_admin?' <span style="background:#c00;color:#fff;font-size:9px;padding:0 3px">ADM</span>':''}`;
+    box.innerHTML=`<a href="channel.html?u=${encodeURIComponent(u.username)}">My Profile</a> | <a href="settings.html">Settings</a> | <a href="#" id="lo2">Log Out</a>`;
+    document.getElementById('lo2').onclick=e=>{e.preventDefault();clearSession();location.reload();};
+  }else{
+    promo.innerHTML=`<a href="signup.html">Sign up for your free account!</a>`;
+    box.innerHTML=`<form id="mini-login"><label>User Name:</label><input type="text" id="ml-user"><label>Password:</label><input type="password" id="ml-pass"><button type="submit">Login</button> <a href="signup.html">Sign Up</a></form>`;
+    document.getElementById('mini-login').onsubmit=async e=>{
+      e.preventDefault();
+      try{setSession(await loginUser(document.getElementById('ml-user').value.trim(),document.getElementById('ml-pass').value));location.reload();}
+      catch(err){alert(err.message);}
+    };
+  }
+})();
+getVideos({limit:15}).then(vs=>{
+  document.getElementById('featured').innerHTML=vs.length?vs.map(videoRow).join(''):'<div class="loading">No videos yet. <a href="upload.html">Upload the first!</a></div>';
+}).catch(err=>{document.getElementById('featured').innerHTML='<div class="error">'+esc(err.message)+'</div>';});
+</script>
+</body>
+</html>
